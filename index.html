@@ -79,7 +79,7 @@
 
   /* カテゴリ別グラフ */
   .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-  .cat-chart-wrap { position: relative; height: 160px; }
+  .cat-chart-wrap { position: relative; height: 180px; }
   .cat-chart-wrap canvas { height: 160px !important; }
 
   /* 凡例 */
@@ -224,6 +224,12 @@
           <div class="table-wrap" id="dash-summary"></div>
         </div>
       </div>
+
+      <div class="card chart-full">
+        <div class="card-title">📊 カテゴリ別 積み上げ推移</div>
+        <div style="position:relative;height:260px"><canvas id="dashStackChart"></canvas></div>
+        <div class="legend" id="dash-stack-legend"></div>
+      </div>
     </div>
 
     <!-- 月次入力 -->
@@ -252,37 +258,37 @@
       <div class="section-block">
         <div class="section-head" style="border-left:3px solid #2E86AB">🏦 銀行・預金</div>
         <div class="form-grid">
-          <div class="form-group" data-person="papa"><label>七十七銀行（パパ）</label><input type="number" id="f-7bank-papa" placeholder="0"><span class="form-hint" id="h-7bank-papa"></span></div>
-          <div class="form-group" data-person="papa"><label>楽天銀行（パパ）</label><input type="number" id="f-rakuten-papa" placeholder="0"><span class="form-hint" id="h-rakuten-papa"></span></div>
-          <div class="form-group" data-person="mama"><label>七十七銀行（ママ）</label><input type="number" id="f-7bank-mama" placeholder="0"><span class="form-hint" id="h-7bank-mama"></span></div>
-          <div class="form-group" data-person="mama"><label>ゆうちょ（ママ）</label><input type="number" id="f-yucho-mama" placeholder="0"><span class="form-hint" id="h-yucho-mama"></span></div>
-          <div class="form-group" data-person="papa"><label>三井住友信託（パパ）</label><input type="number" id="f-smtb-papa" placeholder="0"><span class="form-hint" id="h-smtb-papa"></span></div>
-          <div class="form-group" data-person="mama"><label>三井住友信託（ママ）</label><input type="number" id="f-smtb-mama" placeholder="0"><span class="form-hint" id="h-smtb-mama"></span></div>
+          <div class="form-group" data-person="papa"><label>七十七銀行（パパ）</label><input type="text" inputmode="numeric" id="f-7bank-papa" placeholder="0"><span class="form-hint" id="h-7bank-papa"></span></div>
+          <div class="form-group" data-person="papa"><label>楽天銀行（パパ）</label><input type="text" inputmode="numeric" id="f-rakuten-papa" placeholder="0"><span class="form-hint" id="h-rakuten-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>七十七銀行（ママ）</label><input type="text" inputmode="numeric" id="f-7bank-mama" placeholder="0"><span class="form-hint" id="h-7bank-mama"></span></div>
+          <div class="form-group" data-person="mama"><label>ゆうちょ（ママ）</label><input type="text" inputmode="numeric" id="f-yucho-mama" placeholder="0"><span class="form-hint" id="h-yucho-mama"></span></div>
+          <div class="form-group" data-person="papa"><label>三井住友信託（パパ）</label><input type="text" inputmode="numeric" id="f-smtb-papa" placeholder="0"><span class="form-hint" id="h-smtb-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>三井住友信託（ママ）</label><input type="text" inputmode="numeric" id="f-smtb-mama" placeholder="0"><span class="form-hint" id="h-smtb-mama"></span></div>
         </div>
       </div>
 
       <div class="section-block">
         <div class="section-head" style="border-left:3px solid #BA7517">📈 株</div>
         <div class="form-grid">
-          <div class="form-group" data-person="papa"><label>楽天証券・株（パパ）</label><input type="number" id="f-rak-stock-papa" placeholder="0"><span class="form-hint" id="h-rak-stock-papa"></span></div>
+          <div class="form-group" data-person="papa"><label>楽天証券・株（パパ）</label><input type="text" inputmode="numeric" id="f-rak-stock-papa" placeholder="0"><span class="form-hint" id="h-rak-stock-papa"></span></div>
         </div>
       </div>
 
       <div class="section-block">
         <div class="section-head" style="border-left:3px solid #27AE60">💹 投資信託</div>
         <div class="form-grid">
-          <div class="form-group" data-person="papa"><label>楽天証券・投信（パパ）</label><input type="number" id="f-rak-fund-papa" placeholder="0"><span class="form-hint" id="h-rak-fund-papa"></span></div>
-          <div class="form-group" data-person="mama"><label>SBI・投信（ママ）</label><input type="number" id="f-sbi-mama" placeholder="0"><span class="form-hint" id="h-sbi-mama"></span></div>
-          <div class="form-group" data-person="kids"><label>SBI・投信（けんたろう）</label><input type="number" id="f-sbi-ken" placeholder="0"><span class="form-hint" id="h-sbi-ken"></span></div>
-          <div class="form-group" data-person="kids"><label>SBI・投信（はるな）</label><input type="number" id="f-sbi-haru" placeholder="0"><span class="form-hint" id="h-sbi-haru"></span></div>
+          <div class="form-group" data-person="papa"><label>楽天証券・投信（パパ）</label><input type="text" inputmode="numeric" id="f-rak-fund-papa" placeholder="0"><span class="form-hint" id="h-rak-fund-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>SBI・投信（ママ）</label><input type="text" inputmode="numeric" id="f-sbi-mama" placeholder="0"><span class="form-hint" id="h-sbi-mama"></span></div>
+          <div class="form-group" data-person="kids"><label>SBI・投信（けんたろう）</label><input type="text" inputmode="numeric" id="f-sbi-ken" placeholder="0"><span class="form-hint" id="h-sbi-ken"></span></div>
+          <div class="form-group" data-person="kids"><label>SBI・投信（はるな）</label><input type="text" inputmode="numeric" id="f-sbi-haru" placeholder="0"><span class="form-hint" id="h-sbi-haru"></span></div>
         </div>
       </div>
 
       <div class="section-block">
         <div class="section-head" style="border-left:3px solid #534AB7">🏦 財形貯蓄</div>
         <div class="form-grid">
-          <div class="form-group" data-person="mama"><label>住友生命（ママ）</label><input type="number" id="f-sumisei-mama" placeholder="0"><span class="form-hint" id="h-sumisei-mama"></span></div>
-          <div class="form-group" data-person="papa"><label>ソニー生命（パパ）</label><input type="number" id="f-sony-papa" placeholder="0"><span class="form-hint" id="h-sony-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>住友生命（ママ）</label><input type="text" inputmode="numeric" id="f-sumisei-mama" placeholder="0"><span class="form-hint" id="h-sumisei-mama"></span></div>
+          <div class="form-group" data-person="papa"><label>ソニー生命（パパ）</label><input type="text" inputmode="numeric" id="f-sony-papa" placeholder="0"><span class="form-hint" id="h-sony-papa"></span></div>
         </div>
       </div>
 
@@ -361,18 +367,34 @@ const CAT = { bank:{label:'銀行・預金',color:'#2E86AB'}, stock:{label:'株'
 let records = [];
 const charts = {};
 
+function normalizeMonth(raw) {
+  if (!raw) return '';
+  const s = String(raw);
+  // ISO形式 "2026-04-30T15:00:00.000Z" → "2026-04"
+  const m = s.match(/^(\d{4}-\d{2})/);
+  return m ? m[1] : s;
+}
+
+async function gasCall(params) {
+  // GASはリダイレクトが発生するためno-corsではなくfollowで対応
+  // POSTでJSONをbodyに送るとpreflight発生→GETのクエリパラメータ方式で統一
+  const qs = Object.entries(params).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
+  const res = await fetch(GAS_URL + '?' + qs, {redirect:'follow'});
+  return await res.json();
+}
+
 async function load() {
   showLoading(true);
   try {
-    const res = await fetch(GAS_URL + '?action=getAll');
-    const json = await res.json();
+    const json = await gasCall({action:'getAll'});
     records = (json.records || []).map(r => {
-      const rec = {month: r.month};
+      const rec = {month: normalizeMonth(r.month)};
       FIELDS.forEach(f => rec[f.id] = Number(r[f.id] || 0));
       return rec;
-    });
+    }).filter(r => r.month);
   } catch(e) {
-    showToast('データの読み込みに失敗しました');
+    console.error('load error:', e);
+    showToast('データの読み込みに失敗しました（再読み込みをお試しください）');
     records = [];
   }
   showLoading(false);
@@ -380,11 +402,9 @@ async function load() {
 }
 
 async function gasPost(data) {
-  const res = await fetch(GAS_URL + '?action=save', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  });
-  return await res.json();
+  // データをGETパラメータで送る（GASのdoGetで受け取る）
+  const json = await gasCall({action:'save', data: JSON.stringify(data)});
+  return json;
 }
 
 function showLoading(show) {
@@ -444,7 +464,26 @@ function render() {
   const labels = fl.map(r=>r.month.replace('-','/'));
   const totals = fl.map(r=>calcCats(r).total);
 
-  renderChart('lineChart','line',{labels,datasets:[{data:totals,borderColor:'#185FA5',backgroundColor:'rgba(46,134,171,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4,fill:true,tension:0.3}]},{y:{ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:11}},grid:{display:false}}},false);
+  renderChart('lineChart','line',
+    {labels,datasets:[{data:totals,borderColor:'#185FA5',backgroundColor:'rgba(46,134,171,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:5,fill:true,tension:0.3}]},
+    {y:{ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:11}},grid:{display:false}}},
+    false, null,
+    [{id:'pointLabels',afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      chart.getDatasetMeta(0).data.forEach((pt,i)=>{
+        const v=chart.data.datasets[0].data[i];
+        const man=Math.round(v/10000);
+        const label=man>=10000?Math.round(man/10000).toLocaleString()+'億円':man.toLocaleString()+'万円';
+        ctx.save();
+        ctx.fillStyle='#185FA5';
+        ctx.font='bold 11px sans-serif';
+        ctx.textAlign='center';
+        ctx.textBaseline='bottom';
+        ctx.fillText(label, pt.x, pt.y-6);
+        ctx.restore();
+      });
+    }}]
+  );
 
   if (lat) {
     const lc = calcCats(lat);
@@ -498,23 +537,85 @@ function renderDashSummary(lc, pc) {
   </tbody></table>`;
 }
 
+function hexToRgba(hex, alpha) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function makePointLabelPlugin(color) {
+  return {id:'ptLbl_'+color, afterDatasetsDraw(chart){
+    const {ctx}=chart;
+    const totals = chart.data.datasets[0].data.reduce ? chart.data.datasets[0].data : [];
+    const allTotals = chart._allTotals || [];
+    chart.getDatasetMeta(0).data.forEach((pt,i)=>{
+      const v = chart.data.datasets[0].data[i];
+      if (!v) return;
+      const man = Math.round(v/10000);
+      const pct = allTotals[i] > 0 ? (v/allTotals[i]*100).toFixed(1) : '0.0';
+      const manLabel = man>=10000 ? Math.round(man/10000).toLocaleString()+'億' : man.toLocaleString()+'万円';
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(manLabel+' ('+pct+'%)', pt.x, pt.y-5);
+      ctx.restore();
+    });
+  }};
+}
+
 function renderCatCharts(fl, labels) {
-  const catKeys = [{id:'catBank',cat:'bank',color:'#2E86AB'},{id:'catStock',cat:'stock',color:'#BA7517'},{id:'catFund',cat:'fund',color:'#27AE60'},{id:'catZaikei',cat:'zaikei',color:'#534AB7'}];
+  const allTotals = fl.map(r=>calcCats(r).total);
+  const catKeys = [
+    {id:'catBank',  cat:'bank',   color:'#2E86AB'},
+    {id:'catStock', cat:'stock',  color:'#BA7517'},
+    {id:'catFund',  cat:'fund',   color:'#27AE60'},
+    {id:'catZaikei',cat:'zaikei', color:'#534AB7'}
+  ];
   catKeys.forEach(({id,cat,color})=>{
     const data = fl.map(r=>calcCats(r)[cat]);
-    renderChart(id,'line',{labels,datasets:[{data,borderColor:color,backgroundColor:color.replace(')',' / 0.08)').replace('rgb','rgba').replace('#','').replace(/^(..)(..)(..)$/,(_,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.08)`),borderWidth:2,pointBackgroundColor:color,pointRadius:4,fill:true,tension:0.3}]},{y:{ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:10}},grid:{display:false}}},false);
+    const plugin = makePointLabelPlugin(color);
+    const ctx2 = document.getElementById(id);
+    if (!ctx2) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(ctx2, {
+      type:'line',
+      data:{labels,datasets:[{data,borderColor:color,backgroundColor:hexToRgba(color,0.07),borderWidth:2,pointBackgroundColor:color,pointRadius:5,fill:true,tension:0.3}]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        layout:{padding:{top:28}},
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}},
+        scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}
+      },
+      plugins:[plugin]
+    });
+    charts[id]._allTotals = allTotals;
   });
 
-  const stackData = ['bank','stock','fund','zaikei'].map((cat,i)=>({
+  // カテゴリページの積み上げ
+  const stackData = ['bank','stock','fund','zaikei'].map(cat=>({
     label: CAT[cat].label,
     data: fl.map(r=>calcCats(r)[cat]),
     backgroundColor: CAT[cat].color,
     stack:'a'
   }));
   renderChart('stackChart','bar',{labels,datasets:stackData},{y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}}},true);
-
   const leg = document.getElementById('stack-legend');
   if (leg) leg.innerHTML = ['bank','stock','fund','zaikei'].map(k=>`<div class="legend-item"><div class="legend-dot" style="background:${CAT[k].color}"></div>${CAT[k].label}</div>`).join('');
+
+  // ダッシュボードの積み上げ
+  const dashStack = ['bank','stock','fund','zaikei'].map(cat=>({
+    label: CAT[cat].label,
+    data: fl.map(r=>calcCats(r)[cat]),
+    backgroundColor: CAT[cat].color,
+    stack:'a'
+  }));
+  renderChart('dashStackChart','bar',{labels,datasets:dashStack},{
+    y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},
+    x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}}
+  },true);
+  const dleg = document.getElementById('dash-stack-legend');
+  if (dleg) dleg.innerHTML = ['bank','stock','fund','zaikei'].map(k=>`<div class="legend-item"><div class="legend-dot" style="background:${CAT[k].color}"></div>${CAT[k].label}</div>`).join('');
 }
 
 function renderChart(id, type, data, scalesOpts, hasLegend, cb, extraPlugins) {
@@ -553,11 +654,30 @@ function updateHints() {
   if (!month) return;
   FIELDS.forEach(f=>{
     const last = getLastKnown(f.id, month);
-    const el = document.getElementById('h-'+f.id);
-    if (!el) return;
-    if (last>0) { el.textContent='前回: ¥'+Math.round(last).toLocaleString(); el.className='form-hint has-val'; }
-    else { el.textContent=''; el.className='form-hint'; }
+    const input = document.getElementById(f.id);
+    const hint = document.getElementById('h-'+f.id);
+    if (input && last > 0) {
+      input.value = last;
+      formatComma(input);
+    }
+    if (hint) {
+      hint.textContent = last > 0 ? '前回値を表示中（変更した場合のみ上書きされます）' : '';
+      hint.className = last > 0 ? 'form-hint has-val' : 'form-hint';
+    }
   });
+}
+
+function formatComma(input) {
+  const raw = input.value.replace(/,/g, '');
+  if (!isNaN(raw) && raw !== '') {
+    input.dataset.rawValue = raw;
+    input.value = Number(raw).toLocaleString();
+  }
+}
+
+function unformatComma(input) {
+  const raw = input.value.replace(/,/g, '');
+  input.value = raw;
 }
 
 function setMonthDefault() {
@@ -579,7 +699,7 @@ async function saveData() {
   const month = document.getElementById('input-month').value;
   if (!month) { showToast('年月を選択してください'); return; }
   const rec = buildFilled(month);
-  FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el&&el.value.trim()!=='') rec[f.id]=Number(el.value); });
+  FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el&&el.value.trim()!=='') rec[f.id]=Number(el.value.replace(/,/g,'')); });
 
   showLoading(true);
   try {
@@ -587,6 +707,7 @@ async function saveData() {
     const idx = records.findIndex(r=>r.month===month);
     if (idx>=0) records[idx]=rec; else records.push(rec);
     FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el) el.value=''; });
+    updateHints();
     render();
     showToast('登録しました ✓');
     showPage('dashboard');
@@ -622,6 +743,14 @@ function showToast(msg) {
 }
 
 document.getElementById('input-month').addEventListener('change', updateHints);
+
+// カンマ整形イベント
+FIELDS.forEach(f => {
+  const el = document.getElementById(f.id);
+  if (!el) return;
+  el.addEventListener('blur', () => formatComma(el));
+  el.addEventListener('focus', () => unformatComma(el));
+});
 
 load();
 </script>
