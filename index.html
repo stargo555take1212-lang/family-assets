@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家族の総資産管理</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface2: #f0f4f8;
+    --border: rgba(0,0,0,0.1);
+    --text: #1a202c;
+    --text2: #718096;
+    --text3: #a0aec0;
+    --dark: #1E3A5F;
+    --mid: #2E86AB;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1923;
+      --surface: #1a2535;
+      --surface2: #243044;
+      --border: rgba(255,255,255,0.1);
+      --text: #e8edf5;
+      --text2: #8899aa;
+      --text3: #556677;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+  /* サイドバー */
+  .sidebar { background: var(--dark); color: #fff; padding: 0; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-header h1 { font-size: 15px; font-weight: 600; line-height: 1.4; }
+  .sidebar-header p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+  .nav { padding: 12px 0; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; user-select: none; }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-item.active { color: #fff; border-left-color: #60b3d7; background: rgba(255,255,255,0.1); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-section { font-size: 10px; color: rgba(255,255,255,0.3); padding: 12px 20px 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* メインコンテンツ */
+  .main { overflow-y: auto; }
+  .page { display: none; padding: 28px 32px; max-width: 900px; }
+  .page.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+
+  /* カード */
+  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow); }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+  /* サマリーカード */
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px 20px; box-shadow: var(--shadow); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+  .stat-value { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .stat-sub { font-size: 12px; margin-top: 6px; color: var(--text2); }
+  .positive { color: #2f855a; }
+  .negative { color: #c53030; }
+
+  /* グラフエリア */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .chart-full { margin-bottom: 16px; }
+  .chart-canvas-wrap { position: relative; height: 200px; }
+  .chart-canvas-wrap canvas { height: 200px !important; }
+
+  /* カテゴリ別グラフ */
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .cat-chart-wrap { position: relative; height: 160px; }
+  .cat-chart-wrap canvas { height: 160px !important; }
+
+  /* 凡例 */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* フォーム */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .form-group input, .form-group select {
+    font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 9px 12px; background: var(--surface); color: var(--text); width: 100%;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--mid); box-shadow: 0 0 0 3px rgba(46,134,171,0.15); }
+  .form-hint { font-size: 11px; color: var(--text3); }
+  .form-hint.has-val { color: var(--mid); }
+  .section-head { font-size: 13px; font-weight: 600; color: var(--text); padding: 10px 14px; background: var(--surface2); border-radius: var(--radius-sm); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-block { margin-bottom: 20px; }
+  .input-header { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .person-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .person-pill { font-size: 12px; padding: 5px 14px; border: 1px solid var(--border); border-radius: 99px; cursor: pointer; background: none; color: var(--text2); transition: all 0.15s; }
+  .person-pill:hover { border-color: var(--mid); color: var(--mid); }
+  .person-pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+  .info-box { font-size: 12px; color: var(--text2); background: rgba(46,134,171,0.08); border: 1px solid rgba(46,134,171,0.2); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; }
+
+  /* ボタン */
+  .btn { border: none; border-radius: var(--radius-sm); padding: 11px 24px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--dark); color: #fff; width: 100%; justify-content: center; margin-top: 8px; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--surface2); }
+
+  /* テーブル */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-size: 11px; font-weight: 600; color: var(--text2); padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  .td-right { text-align: right; }
+  .td-total { font-weight: 600; }
+  .row-total { background: var(--surface2); }
+
+  /* トースト */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark); color: #fff; padding: 10px 22px; border-radius: 99px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* カラーアクセント */
+  .accent-bank   { color: #185FA5; }
+  .accent-stock  { color: #854F0B; }
+  .accent-fund   { color: #3B6D11; }
+  .accent-zaikei { color: #3C3489; }
+
+  /* スクロールバー */
+  .main::-webkit-scrollbar { width: 6px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="loading" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="color:#fff;font-size:14px;">処理中...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<div class="app-shell">
+
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>🏠 家族の<br>総資産管理</h1>
+      <p>Family Asset Tracker</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">メニュー</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        ダッシュボード
+      </div>
+      <div class="nav-item" onclick="showPage('input')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/><path d="M17.586 3.586a2 2 0 112.828 2.828L12 15l-4 1 1-4 8.586-8.414z"/></svg>
+        月次入力
+      </div>
+      <div class="nav-item" onclick="showPage('category')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        カテゴリ別推移
+      </div>
+      <div class="nav-item" onclick="showPage('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        履歴
+      </div>
+    </nav>
+    <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-secondary" style="width:100%;font-size:12px;justify-content:center" onclick="exportCSV()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSVエクスポート
+      </button>
+    </div>
+  </aside>
+
+  <!-- メイン -->
+  <main class="main">
+
+    <!-- ダッシュボード -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-title">ダッシュボード</div>
+      <div class="page-sub" id="dash-sub">最新月の資産状況</div>
+
+      <div class="summary-grid">
+        <div class="stat-card">
+          <div class="stat-label">💰 総資産（最新）</div>
+          <div class="stat-value" id="s-total">¥0</div>
+          <div class="stat-sub" id="s-month">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📈 前月比</div>
+          <div class="stat-value" id="s-diff">—</div>
+          <div class="stat-sub" id="s-pct">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📅 記録月数</div>
+          <div class="stat-value" id="s-months">0</div>
+          <div class="stat-sub">ヶ月</div>
+        </div>
+      </div>
+
+      <div class="card chart-full">
+        <div class="card-title">📊 総資産推移</div>
+        <div class="chart-canvas-wrap"><canvas id="lineChart"></canvas></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-title">🥧 カテゴリ別内訳（最新月）</div>
+          <div class="chart-canvas-wrap"><canvas id="pieChart"></canvas></div>
+          <div class="legend" id="pie-legend"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 最新月サマリー</div>
+          <div class="table-wrap" id="dash-summary"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 月次入力 -->
+    <div id="page-input" class="page">
+      <div class="page-title">月次入力</div>
+      <div class="page-sub">変更のあった口座だけ入力してください。空欄は前回値を自動引き継ぎします。</div>
+
+      <div class="input-header">
+        <div class="form-group">
+          <label>入力月</label>
+          <input type="month" id="input-month">
+        </div>
+        <div class="form-group">
+          <label>対象者で絞り込む</label>
+          <div class="person-pills" style="margin-top:4px">
+            <button class="person-pill active" onclick="filterPerson('all',this)">全員</button>
+            <button class="person-pill" onclick="filterPerson('papa',this)">パパ</button>
+            <button class="person-pill" onclick="filterPerson('mama',this)">ママ</button>
+            <button class="person-pill" onclick="filterPerson('kids',this)">子ども</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">💡 空欄のまま登録すると、その口座は前回入力した値を引き継ぎます</div>
+
+      <div class="section-block">
+        <div class="section-head" style="border-left:3px solid #2E86AB">🏦 銀行・預金</div>
+        <div class="form-grid">
+          <div class="form-group" data-person="papa"><label>七十七銀行（パパ）</label><input type="number" id="f-7bank-papa" placeholder="0"><span class="form-hint" id="h-7bank-papa"></span></div>
+          <div class="form-group" data-person="papa"><label>楽天銀行（パパ）</label><input type="number" id="f-rakuten-papa" placeholder="0"><span class="form-hint" id="h-rakuten-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>七十七銀行（ママ）</label><input type="number" id="f-7bank-mama" placeholder="0"><span class="form-hint" id="h-7bank-mama"></span></div>
+          <div class="form-group" data-person="mama"><label>ゆうちょ（ママ）</label><input type="number" id="f-yucho-mama" placeholder="0"><span class="form-hint" id="h-yucho-mama"></span></div>
+          <div class="form-group" data-person="papa"><label>三井住友信託（パパ）</label><input type="number" id="f-smtb-papa" placeholder="0"><span class="form-hint" id="h-smtb-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>三井住友信託（ママ）</label><input type="number" id="f-smtb-mama" placeholder="0"><span class="form-hint" id="h-smtb-mama"></span></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head" style="border-left:3px solid #BA7517">📈 株</div>
+        <div class="form-grid">
+          <div class="form-group" data-person="papa"><label>楽天証券・株（パパ）</label><input type="number" id="f-rak-stock-papa" placeholder="0"><span class="form-hint" id="h-rak-stock-papa"></span></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head" style="border-left:3px solid #27AE60">💹 投資信託</div>
+        <div class="form-grid">
+          <div class="form-group" data-person="papa"><label>楽天証券・投信（パパ）</label><input type="number" id="f-rak-fund-papa" placeholder="0"><span class="form-hint" id="h-rak-fund-papa"></span></div>
+          <div class="form-group" data-person="mama"><label>SBI・投信（ママ）</label><input type="number" id="f-sbi-mama" placeholder="0"><span class="form-hint" id="h-sbi-mama"></span></div>
+          <div class="form-group" data-person="kids"><label>SBI・投信（けんたろう）</label><input type="number" id="f-sbi-ken" placeholder="0"><span class="form-hint" id="h-sbi-ken"></span></div>
+          <div class="form-group" data-person="kids"><label>SBI・投信（はるな）</label><input type="number" id="f-sbi-haru" placeholder="0"><span class="form-hint" id="h-sbi-haru"></span></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head" style="border-left:3px solid #534AB7">🏦 財形貯蓄</div>
+        <div class="form-grid">
+          <div class="form-group" data-person="mama"><label>住友生命（ママ）</label><input type="number" id="f-sumisei-mama" placeholder="0"><span class="form-hint" id="h-sumisei-mama"></span></div>
+          <div class="form-group" data-person="papa"><label>ソニー生命（パパ）</label><input type="number" id="f-sony-papa" placeholder="0"><span class="form-hint" id="h-sony-papa"></span></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveData()">登録する ✓</button>
+    </div>
+
+    <!-- カテゴリ別推移 -->
+    <div id="page-category" class="page">
+      <div class="page-title">カテゴリ別推移</div>
+      <div class="page-sub">銀行・株・投資信託・財形それぞれの推移</div>
+      <div class="cat-grid">
+        <div class="card">
+          <div class="card-title" style="color:#185FA5">🏦 銀行・預金</div>
+          <div class="cat-chart-wrap"><canvas id="catBank"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:#854F0B">📈 株</div>
+          <div class="cat-chart-wrap"><canvas id="catStock"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:#3B6D11">💹 投資信託</div>
+          <div class="cat-chart-wrap"><canvas id="catFund"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:#3C3489">💼 財形貯蓄</div>
+          <div class="cat-chart-wrap"><canvas id="catZaikei"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 カテゴリ別 積み上げ推移</div>
+        <div class="chart-canvas-wrap"><canvas id="stackChart"></canvas></div>
+        <div class="legend" id="stack-legend"></div>
+      </div>
+    </div>
+
+    <!-- 履歴 -->
+    <div id="page-history" class="page">
+      <div class="page-title">履歴</div>
+      <div class="page-sub">月次データの一覧</div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="history-table">
+            <thead><tr><th>年月</th><th class="td-right">銀行・預金</th><th class="td-right">株</th><th class="td-right">投資信託</th><th class="td-right">財形貯蓄</th><th class="td-right">総資産</th><th class="td-right">前月比</th></tr></thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwAFBZ4h4_2eFFy4ih_8Y2vx2jJoJVrax1u_pSGN44qnRnKGX0T9UgZOR0MlGxBcNU43w/exec';
+
+const FIELDS = [
+  {id:'f-7bank-papa',     label:'七十七銀行（パパ）',      cat:'bank',   person:'papa'},
+  {id:'f-rakuten-papa',   label:'楽天銀行（パパ）',         cat:'bank',   person:'papa'},
+  {id:'f-7bank-mama',     label:'七十七銀行（ママ）',       cat:'bank',   person:'mama'},
+  {id:'f-yucho-mama',     label:'ゆうちょ（ママ）',         cat:'bank',   person:'mama'},
+  {id:'f-smtb-papa',      label:'三井住友信託（パパ）',     cat:'bank',   person:'papa'},
+  {id:'f-smtb-mama',      label:'三井住友信託（ママ）',     cat:'bank',   person:'mama'},
+  {id:'f-rak-stock-papa', label:'楽天証券・株（パパ）',     cat:'stock',  person:'papa'},
+  {id:'f-rak-fund-papa',  label:'楽天証券・投信（パパ）',   cat:'fund',   person:'papa'},
+  {id:'f-sbi-mama',       label:'SBI・投信（ママ）',        cat:'fund',   person:'mama'},
+  {id:'f-sbi-ken',        label:'SBI・投信（けんたろう）',  cat:'fund',   person:'kids'},
+  {id:'f-sbi-haru',       label:'SBI・投信（はるな）',      cat:'fund',   person:'kids'},
+  {id:'f-sumisei-mama',   label:'住友生命（ママ）',         cat:'zaikei', person:'mama'},
+  {id:'f-sony-papa',      label:'ソニー生命（パパ）',       cat:'zaikei', person:'papa'},
+];
+
+const CAT = { bank:{label:'銀行・預金',color:'#2E86AB'}, stock:{label:'株',color:'#BA7517'}, fund:{label:'投資信託',color:'#27AE60'}, zaikei:{label:'財形貯蓄',color:'#534AB7'} };
+
+let records = [];
+const charts = {};
+
+async function load() {
+  showLoading(true);
+  try {
+    const res = await fetch(GAS_URL + '?action=getAll');
+    const json = await res.json();
+    records = (json.records || []).map(r => {
+      const rec = {month: r.month};
+      FIELDS.forEach(f => rec[f.id] = Number(r[f.id] || 0));
+      return rec;
+    });
+  } catch(e) {
+    showToast('データの読み込みに失敗しました');
+    records = [];
+  }
+  showLoading(false);
+  render();
+}
+
+async function gasPost(data) {
+  const res = await fetch(GAS_URL + '?action=save', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+  return await res.json();
+}
+
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+}
+
+function getLastKnown(fieldId, beforeMonth) {
+  return [...records].sort((a,b)=>a.month.localeCompare(b.month))
+    .filter(r=>r.month<beforeMonth)
+    .reduce((last,r)=>r[fieldId]!==undefined?Number(r[fieldId]):last, 0);
+}
+
+function buildFilled(month) {
+  const rec = {month};
+  FIELDS.forEach(f => rec[f.id] = getLastKnown(f.id, month));
+  const stored = records.find(r=>r.month===month);
+  if (stored) FIELDS.forEach(f => { if (stored[f.id]!==undefined) rec[f.id]=Number(stored[f.id]); });
+  return rec;
+}
+
+function calcCats(rec) {
+  const g = id => Number(rec[id]||0);
+  const bank   = FIELDS.filter(f=>f.cat==='bank').reduce((s,f)=>s+g(f.id),0);
+  const stock  = FIELDS.filter(f=>f.cat==='stock').reduce((s,f)=>s+g(f.id),0);
+  const fund   = FIELDS.filter(f=>f.cat==='fund').reduce((s,f)=>s+g(f.id),0);
+  const zaikei = FIELDS.filter(f=>f.cat==='zaikei').reduce((s,f)=>s+g(f.id),0);
+  return {bank,stock,fund,zaikei,total:bank+stock+fund+zaikei};
+}
+
+function months() { return [...new Set(records.map(r=>r.month))].sort(); }
+function filled()  { return months().map(m=>buildFilled(m)); }
+
+function fmt(n)   { return '¥'+Math.round(n).toLocaleString(); }
+function fmtM(n)  { const v=Math.round(n/10000); return '¥'+(Math.abs(v)>=10000?Math.round(v/10000)+'億':v+'万'); }
+function fmtD(n)  { return (n>=0?'+':'')+Math.round(n).toLocaleString()+'円'; }
+
+function render() {
+  const fl = filled();
+  const lat = fl[fl.length-1];
+  const prv = fl[fl.length-2];
+
+  document.getElementById('s-months').textContent = fl.length;
+  if (lat) {
+    const lc = calcCats(lat);
+    document.getElementById('s-total').textContent = fmt(lc.total);
+    document.getElementById('s-month').textContent = lat.month.replace('-','/')+' 時点';
+    if (prv) {
+      const pc = calcCats(prv), diff = lc.total-pc.total, pct = pc.total?diff/pc.total*100:0;
+      const dv = document.getElementById('s-diff');
+      dv.textContent = fmtD(diff); dv.className = 'stat-value '+(diff>=0?'positive':'negative');
+      const pv = document.getElementById('s-pct');
+      pv.textContent = (diff>=0?'+':'')+pct.toFixed(1)+'%'; pv.className = 'stat-sub '+(diff>=0?'positive':'negative');
+    }
+    renderDashSummary(lc, prv?calcCats(prv):null);
+  }
+
+  const labels = fl.map(r=>r.month.replace('-','/'));
+  const totals = fl.map(r=>calcCats(r).total);
+
+  renderChart('lineChart','line',{labels,datasets:[{data:totals,borderColor:'#185FA5',backgroundColor:'rgba(46,134,171,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4,fill:true,tension:0.3}]},{y:{ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:11}},grid:{display:false}}},false);
+
+  if (lat) {
+    const lc = calcCats(lat);
+    const cats = ['bank','stock','fund','zaikei'].filter(k=>lc[k]>0);
+    const total = lc.total;
+    renderChart('pieChart','doughnut',{
+      labels:cats.map(k=>CAT[k].label),
+      datasets:[{data:cats.map(k=>lc[k]),backgroundColor:cats.map(k=>CAT[k].color),borderWidth:2,borderColor:'#fff'}]
+    },{cutout:'56%'}, true, (chart)=>{
+      const leg = document.getElementById('pie-legend');
+      leg.innerHTML = cats.map(k=>{
+        const pct=(lc[k]/total*100).toFixed(1);
+        return `<div class="legend-item"><div class="legend-dot" style="background:${CAT[k].color}"></div>${CAT[k].label}: ${fmt(lc[k])} <span style="color:var(--text3)">(${pct}%)</span></div>`;
+      }).join('');
+    }, [{
+      id:'pctLabels',
+      afterDatasetDraw(chart){
+        const {ctx,data}=chart; const total=data.datasets[0].data.reduce((a,b)=>a+b,0);
+        chart.getDatasetMeta(0).data.forEach((arc,i)=>{
+          const pct=data.datasets[0].data[i]/total*100; if(pct<4)return;
+          const angle=(arc.startAngle+arc.endAngle)/2, r=(arc.innerRadius+arc.outerRadius)/2;
+          ctx.save(); ctx.fillStyle='#fff'; ctx.font='bold 12px sans-serif';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(pct.toFixed(1)+'%',arc.x+Math.cos(angle)*r,arc.y+Math.sin(angle)*r);
+          ctx.restore();
+        });
+      }
+    }]);
+  }
+
+  renderCatCharts(fl, labels);
+  renderHistory(fl);
+  updateHints();
+}
+
+function renderDashSummary(lc, pc) {
+  const rows = [
+    ['銀行・預金', lc.bank,   pc?lc.bank-pc.bank:null],
+    ['株',         lc.stock,  pc?lc.stock-pc.stock:null],
+    ['投資信託',   lc.fund,   pc?lc.fund-pc.fund:null],
+    ['財形貯蓄',   lc.zaikei, pc?lc.zaikei-pc.zaikei:null],
+    ['総資産',     lc.total,  pc?lc.total-pc.total:null],
+  ];
+  document.getElementById('dash-summary').innerHTML = `<table><thead><tr><th>カテゴリ</th><th class="td-right">金額</th><th class="td-right">前月比</th></tr></thead><tbody>
+    ${rows.map((r,i)=>{
+      const isTotal = i===rows.length-1;
+      const diff = r[2];
+      const dStr = diff!==null ? `<span class="${diff>=0?'positive':'negative'}">${fmtD(diff)}</span>` : '—';
+      return `<tr class="${isTotal?'row-total':''}"><td>${r[0]}</td><td class="td-right ${isTotal?'td-total':''}">${fmt(r[1])}</td><td class="td-right">${dStr}</td></tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+function renderCatCharts(fl, labels) {
+  const catKeys = [{id:'catBank',cat:'bank',color:'#2E86AB'},{id:'catStock',cat:'stock',color:'#BA7517'},{id:'catFund',cat:'fund',color:'#27AE60'},{id:'catZaikei',cat:'zaikei',color:'#534AB7'}];
+  catKeys.forEach(({id,cat,color})=>{
+    const data = fl.map(r=>calcCats(r)[cat]);
+    renderChart(id,'line',{labels,datasets:[{data,borderColor:color,backgroundColor:color.replace(')',' / 0.08)').replace('rgb','rgba').replace('#','').replace(/^(..)(..)(..)$/,(_,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.08)`),borderWidth:2,pointBackgroundColor:color,pointRadius:4,fill:true,tension:0.3}]},{y:{ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:10}},grid:{display:false}}},false);
+  });
+
+  const stackData = ['bank','stock','fund','zaikei'].map((cat,i)=>({
+    label: CAT[cat].label,
+    data: fl.map(r=>calcCats(r)[cat]),
+    backgroundColor: CAT[cat].color,
+    stack:'a'
+  }));
+  renderChart('stackChart','bar',{labels,datasets:stackData},{y:{stacked:true,ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}}},true);
+
+  const leg = document.getElementById('stack-legend');
+  if (leg) leg.innerHTML = ['bank','stock','fund','zaikei'].map(k=>`<div class="legend-item"><div class="legend-dot" style="background:${CAT[k].color}"></div>${CAT[k].label}</div>`).join('');
+}
+
+function renderChart(id, type, data, scalesOpts, hasLegend, cb, extraPlugins) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (charts[id]) charts[id].destroy();
+  const plugins = [{id:'noData',beforeDraw(c){if(!c.data.datasets[0]?.data?.length){const{ctx,chartArea}=c;ctx.save();ctx.fillStyle='var(--text3)';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('データなし',(chartArea.left+chartArea.right)/2,(chartArea.top+chartArea.bottom)/2);ctx.restore();}}}];
+  if (extraPlugins) plugins.push(...extraPlugins);
+  charts[id] = new Chart(ctx, {
+    type,
+    data,
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:hasLegend&&type!=='doughnut'}, tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.raw)}`}} },
+      scales: type==='doughnut'||type==='pie' ? undefined : scalesOpts
+    },
+    plugins
+  });
+  if (cb) cb(charts[id]);
+}
+
+function renderHistory(fl) {
+  const tbody = document.getElementById('history-body');
+  if (!fl.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">データがありません</td></tr>'; return; }
+  tbody.innerHTML = [...fl].reverse().map((r,i)=>{
+    const c = calcCats(r);
+    const prev = fl[fl.length-2-i];
+    const diff = prev ? c.total - calcCats(prev).total : null;
+    const dStr = diff!==null ? `<span class="${diff>=0?'positive':'negative'}">${fmtD(diff)}</span>` : '—';
+    return `<tr><td>${r.month.replace('-','/')}</td><td class="td-right">${fmt(c.bank)}</td><td class="td-right">${fmt(c.stock)}</td><td class="td-right">${fmt(c.fund)}</td><td class="td-right">${fmt(c.zaikei)}</td><td class="td-right td-total">${fmt(c.total)}</td><td class="td-right">${dStr}</td></tr>`;
+  }).join('');
+}
+
+function updateHints() {
+  const month = document.getElementById('input-month').value;
+  if (!month) return;
+  FIELDS.forEach(f=>{
+    const last = getLastKnown(f.id, month);
+    const el = document.getElementById('h-'+f.id);
+    if (!el) return;
+    if (last>0) { el.textContent='前回: ¥'+Math.round(last).toLocaleString(); el.className='form-hint has-val'; }
+    else { el.textContent=''; el.className='form-hint'; }
+  });
+}
+
+function setMonthDefault() {
+  const now = new Date();
+  document.getElementById('input-month').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+}
+
+function filterPerson(p, btn) {
+  document.querySelectorAll('.person-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[data-person]').forEach(el=>{
+    const show = p==='all'||el.dataset.person===p;
+    el.style.opacity = show?'1':'0.3';
+    el.style.pointerEvents = show?'':'none';
+  });
+}
+
+async function saveData() {
+  const month = document.getElementById('input-month').value;
+  if (!month) { showToast('年月を選択してください'); return; }
+  const rec = buildFilled(month);
+  FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el&&el.value.trim()!=='') rec[f.id]=Number(el.value); });
+
+  showLoading(true);
+  try {
+    await gasPost(rec);
+    const idx = records.findIndex(r=>r.month===month);
+    if (idx>=0) records[idx]=rec; else records.push(rec);
+    FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el) el.value=''; });
+    render();
+    showToast('登録しました ✓');
+    showPage('dashboard');
+  } catch(e) {
+    showToast('保存に失敗しました。もう一度お試しください。');
+  }
+  showLoading(false);
+}
+
+function exportCSV() {
+  const fl = filled();
+  const headers = ['年月',...FIELDS.map(f=>f.label),'銀行・預金計','株計','投資信託計','財形貯蓄計','総資産'];
+  const rows = fl.map(r=>{ const c=calcCats(r); return [r.month,...FIELDS.map(f=>r[f.id]||0),c.bank,c.stock,c.fund,c.zaikei,c.total]; });
+  const csv = [headers,...rows].map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = '資産管理_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const navMap = {dashboard:0,input:1,category:2,history:3};
+  document.querySelectorAll('.nav-item')[navMap[name]]?.classList.add('active');
+  if (name==='input') { setMonthDefault(); updateHints(); }
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+document.getElementById('input-month').addEventListener('change', updateHints);
+
+load();
+</script>
+</body>
+</html>
