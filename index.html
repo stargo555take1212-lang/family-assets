@@ -368,7 +368,7 @@ function gasCall(params) {
 
 // ========== 初期ロード ==========
 async function load() {
-  showLoading(true);
+  // スプラッシュ表示中はloadingスピナーを出さない
   try {
     // 口座設定とデータを並行取得
     const [settingsRes, dataRes] = await Promise.all([
@@ -400,7 +400,6 @@ async function load() {
     records = [];
     showToast('データ読み込み失敗。再読み込みしてください。');
   }
-  showLoading(false);
   buildInputForm();
   render();
   renderSettings();
