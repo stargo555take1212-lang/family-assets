@@ -739,14 +739,27 @@ async function saveData() {
   const rawMonth = document.getElementById('input-month').value;
   const month = normalizeMonth(rawMonth) || rawMonth;
   if (!month) { showToast('年月を選択してください'); return; }
-  const rec = buildFilled(month);
-  FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el&&el.value.trim()!=='') rec[f.id]=Number(el.value.replace(/,/g,'')); });
+
+  // 送信データを作成：入力あり→その値、空欄→-1（GAS側でキープ）
+  const rec = { month };
+  FIELDS.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    const raw = el.value.replace(/,/g, '').trim();
+    rec[f.id] = raw !== '' ? Number(raw) : -1;
+  });
 
   showLoading(true);
   try {
     await gasPost(rec);
+    // ローカルにも反映（-1は既存値をキープ）
+    const existing = records.find(r=>r.month===month) || {month};
+    const merged = {month};
+    FIELDS.forEach(f => {
+      merged[f.id] = rec[f.id] === -1 ? (Number(existing[f.id]) || 0) : rec[f.id];
+    });
     const idx = records.findIndex(r=>r.month===month);
-    if (idx>=0) records[idx]=rec; else records.push(rec);
+    if (idx>=0) records[idx]=merged; else records.push(merged);
     FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el) el.value=''; });
     updateHints();
     render();
