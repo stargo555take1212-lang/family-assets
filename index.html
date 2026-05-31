@@ -371,6 +371,14 @@ const charts = {};
 function normalizeMonth(raw) {
   if (!raw) return '';
   const s = String(raw).trim();
+  // "Fri May 01 2026..." のような日付文字列
+  if (s.length > 10 && isNaN(Number(s))) {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    }
+  }
+  // "2026-05" や "2026/05" 形式
   const m = s.match(/(\d{4})[\-\/](\d{2})/);
   return m ? m[1] + '-' + m[2] : '';
 }
