@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0102)file:///C:/Users/User/Downloads/%E5%AE%B6%E6%97%8F%E3%81%AE%E8%B3%87%E7%94%A3%E7%AE%A1%E7%90%86_7.html -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>家族の総資産管理</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="./index_files/chart.umd.min.js.ダウンロード"></script>
 <style>
   :root {
     --bg: #f5f7fa;
@@ -142,7 +142,7 @@
 </style>
 </head>
 <body>
-<div id="loading" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+<div id="loading" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.4); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
   <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
   <div style="color:#fff;font-size:14px;">処理中...</div>
 </div>
@@ -157,26 +157,26 @@
     </div>
     <nav class="nav">
       <div class="nav-section">メニュー</div>
-      <div class="nav-item active" onclick="showPage('dashboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <div class="nav-item active" onclick="showPage(&#39;dashboard&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         ダッシュボード
       </div>
-      <div class="nav-item" onclick="showPage('input')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/><path d="M17.586 3.586a2 2 0 112.828 2.828L12 15l-4 1 1-4 8.586-8.414z"/></svg>
+      <div class="nav-item" onclick="showPage(&#39;input&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path><path d="M17.586 3.586a2 2 0 112.828 2.828L12 15l-4 1 1-4 8.586-8.414z"></path></svg>
         月次入力
       </div>
-      <div class="nav-item" onclick="showPage('category')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div class="nav-item" onclick="showPage(&#39;category&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
         カテゴリ別推移
       </div>
-      <div class="nav-item" onclick="showPage('history')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <div class="nav-item" onclick="showPage(&#39;history&#39;)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
         履歴
       </div>
     </nav>
     <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1)">
       <button class="btn btn-secondary" style="width:100%;font-size:12px;justify-content:center" onclick="exportCSV()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         CSVエクスポート
       </button>
     </div>
@@ -210,7 +210,7 @@
 
       <div class="card chart-full">
         <div class="card-title">📊 総資産推移</div>
-        <div class="chart-canvas-wrap"><canvas id="lineChart"></canvas></div>
+        <div class="chart-canvas-wrap"><canvas id="lineChart" width="1192" height="300" style="display: block; box-sizing: border-box; height: 200px; width: 794px;"></canvas></div>
       </div>
 
       <div class="charts-row">
@@ -227,8 +227,8 @@
 
       <div class="card chart-full">
         <div class="card-title">📊 カテゴリ別 積み上げ推移</div>
-        <div style="position:relative;height:260px"><canvas id="dashStackChart"></canvas></div>
-        <div class="legend" id="dash-stack-legend"></div>
+        <div style="position:relative;height:260px"><canvas id="dashStackChart" width="1192" height="390" style="display: block; box-sizing: border-box; height: 260px; width: 794px;"></canvas></div>
+        <div class="legend" id="dash-stack-legend"><div class="legend-item"><div class="legend-dot" style="background:#2E86AB"></div>銀行・預金</div><div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div>株</div><div class="legend-item"><div class="legend-dot" style="background:#27AE60"></div>投資信託</div><div class="legend-item"><div class="legend-dot" style="background:#534AB7"></div>財形貯蓄</div></div>
       </div>
     </div>
 
@@ -245,10 +245,10 @@
         <div class="form-group">
           <label>対象者で絞り込む</label>
           <div class="person-pills" style="margin-top:4px">
-            <button class="person-pill active" onclick="filterPerson('all',this)">全員</button>
-            <button class="person-pill" onclick="filterPerson('papa',this)">パパ</button>
-            <button class="person-pill" onclick="filterPerson('mama',this)">ママ</button>
-            <button class="person-pill" onclick="filterPerson('kids',this)">子ども</button>
+            <button class="person-pill active" onclick="filterPerson(&#39;all&#39;,this)">全員</button>
+            <button class="person-pill" onclick="filterPerson(&#39;papa&#39;,this)">パパ</button>
+            <button class="person-pill" onclick="filterPerson(&#39;mama&#39;,this)">ママ</button>
+            <button class="person-pill" onclick="filterPerson(&#39;kids&#39;,this)">子ども</button>
           </div>
         </div>
       </div>
@@ -302,25 +302,25 @@
       <div class="cat-grid">
         <div class="card">
           <div class="card-title" style="color:#185FA5">🏦 銀行・預金</div>
-          <div class="cat-chart-wrap"><canvas id="catBank"></canvas></div>
+          <div class="cat-chart-wrap"><canvas id="catBank" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title" style="color:#854F0B">📈 株</div>
-          <div class="cat-chart-wrap"><canvas id="catStock"></canvas></div>
+          <div class="cat-chart-wrap"><canvas id="catStock" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title" style="color:#3B6D11">💹 投資信託</div>
-          <div class="cat-chart-wrap"><canvas id="catFund"></canvas></div>
+          <div class="cat-chart-wrap"><canvas id="catFund" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title" style="color:#3C3489">💼 財形貯蓄</div>
-          <div class="cat-chart-wrap"><canvas id="catZaikei"></canvas></div>
+          <div class="cat-chart-wrap"><canvas id="catZaikei" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
         </div>
       </div>
       <div class="card">
         <div class="card-title">📊 カテゴリ別 積み上げ推移</div>
-        <div class="chart-canvas-wrap"><canvas id="stackChart"></canvas></div>
-        <div class="legend" id="stack-legend"></div>
+        <div class="chart-canvas-wrap"><canvas id="stackChart" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;" width="0"></canvas></div>
+        <div class="legend" id="stack-legend"><div class="legend-item"><div class="legend-dot" style="background:#2E86AB"></div>銀行・預金</div><div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div>株</div><div class="legend-item"><div class="legend-dot" style="background:#27AE60"></div>投資信託</div><div class="legend-item"><div class="legend-dot" style="background:#534AB7"></div>財形貯蓄</div></div>
       </div>
     </div>
 
@@ -332,7 +332,7 @@
         <div class="table-wrap">
           <table id="history-table">
             <thead><tr><th>年月</th><th class="td-right">銀行・預金</th><th class="td-right">株</th><th class="td-right">投資信託</th><th class="td-right">財形貯蓄</th><th class="td-right">総資産</th><th class="td-right">前月比</th></tr></thead>
-            <tbody id="history-body"></tbody>
+            <tbody id="history-body"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">データがありません</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -367,34 +367,42 @@ const CAT = { bank:{label:'銀行・預金',color:'#2E86AB'}, stock:{label:'株'
 let records = [];
 const charts = {};
 
+// あらゆる形式を YYYY-MM に正規化
 function normalizeMonth(raw) {
   if (!raw) return '';
-  const s = String(raw);
-  // ISO形式 "2026-04-30T15:00:00.000Z" → "2026-04"
-  const m = s.match(/^(\d{4}-\d{2})/);
-  return m ? m[1] : s;
+  const s = String(raw).trim();
+  const m = s.match(/(\d{4})[\-\/](\d{2})/);
+  return m ? m[1] + '-' + m[2] : '';
 }
 
+// GAS APIを呼び出す（GETパラメータ方式）
 async function gasCall(params) {
-  // GASはリダイレクトが発生するためno-corsではなくfollowで対応
-  // POSTでJSONをbodyに送るとpreflight発生→GETのクエリパラメータ方式で統一
-  const qs = Object.entries(params).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
-  const res = await fetch(GAS_URL + '?' + qs, {redirect:'follow'});
-  return await res.json();
+  const qs = Object.entries(params)
+    .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(String(v)))
+    .join('&');
+  const res = await fetch(GAS_URL + '?' + qs);
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e) { console.error('GAS response parse error:', text); throw e; }
 }
 
 async function load() {
   showLoading(true);
   try {
-    const json = await gasCall({action:'getAll'});
-    records = (json.records || []).map(r => {
-      const rec = {month: normalizeMonth(r.month)};
-      FIELDS.forEach(f => rec[f.id] = Number(r[f.id] || 0));
-      return rec;
-    }).filter(r => r.month);
+    const json = await gasCall({action: 'getAll'});
+    if (json.status !== 'ok') throw new Error(json.message || 'GAS error');
+    records = (json.records || [])
+      .map(r => {
+        const month = normalizeMonth(r.month);
+        if (!month) return null;
+        const rec = {month};
+        FIELDS.forEach(f => rec[f.id] = Number(r[f.id]) || 0);
+        return rec;
+      })
+      .filter(Boolean);
   } catch(e) {
     console.error('load error:', e);
-    showToast('データの読み込みに失敗しました（再読み込みをお試しください）');
+    showToast('データ読み込み失敗。ページを再読み込みしてください。');
     records = [];
   }
   showLoading(false);
@@ -402,8 +410,10 @@ async function load() {
 }
 
 async function gasPost(data) {
-  // データをGETパラメータで送る（GASのdoGetで受け取る）
-  const json = await gasCall({action:'save', data: JSON.stringify(data)});
+  // month を必ず YYYY-MM 形式にしてから送る
+  data.month = normalizeMonth(data.month) || data.month;
+  const json = await gasCall({action: 'save', data: JSON.stringify(data)});
+  if (json.status !== 'ok') throw new Error(json.message || 'save error');
   return json;
 }
 
@@ -411,10 +421,15 @@ function showLoading(show) {
   document.getElementById('loading').style.display = show ? 'flex' : 'none';
 }
 
-function getLastKnown(fieldId, beforeMonth) {
-  return [...records].sort((a,b)=>a.month.localeCompare(b.month))
-    .filter(r=>r.month<beforeMonth)
-    .reduce((last,r)=>r[fieldId]!==undefined?Number(r[fieldId]):last, 0);
+function getLastKnown(fieldId, targetMonth) {
+  // targetMonthと同月を含む直近の値を返す
+  const sorted = [...records].sort((a,b)=>a.month.localeCompare(b.month));
+  let last = 0;
+  for (const r of sorted) {
+    if (r.month > targetMonth) break;
+    if (r[fieldId] !== undefined) last = Number(r[fieldId]) || 0;
+  }
+  return last;
 }
 
 function buildFilled(month) {
@@ -682,7 +697,10 @@ function unformatComma(input) {
 
 function setMonthDefault() {
   const now = new Date();
-  document.getElementById('input-month').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const el = document.getElementById('input-month');
+  if (el && !el.value) el.value = y + '-' + m;
 }
 
 function filterPerson(p, btn) {
@@ -696,7 +714,8 @@ function filterPerson(p, btn) {
 }
 
 async function saveData() {
-  const month = document.getElementById('input-month').value;
+  const rawMonth = document.getElementById('input-month').value;
+  const month = normalizeMonth(rawMonth) || rawMonth;
   if (!month) { showToast('年月を選択してください'); return; }
   const rec = buildFilled(month);
   FIELDS.forEach(f=>{ const el=document.getElementById(f.id); if(el&&el.value.trim()!=='') rec[f.id]=Number(el.value.replace(/,/g,'')); });
@@ -754,5 +773,6 @@ FIELDS.forEach(f => {
 
 load();
 </script>
-</body>
-</html>
+
+
+</body></html>
