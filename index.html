@@ -564,6 +564,23 @@ function fmt(n)    { return '¥'+Math.round(n).toLocaleString(); }
 function fmtM(n)   { const v=Math.round(n/10000); return '¥'+(Math.abs(v)>=10000?Math.round(v/10000).toLocaleString()+'億':v.toLocaleString()+'万'); }
 function fmtD(n)   { return (n>=0?'+':'')+Math.round(n).toLocaleString()+'円'; }
 
+// データに合わせてY軸の範囲を自動計算
+function calcYAxis(data) {
+  const vals = data.filter(v => v != null && !isNaN(v));
+  if (!vals.length) return {min:0, max:100};
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const range = maxV - minV || maxV * 0.1 || 1000000;
+  const pad = range * 0.15; // 上下15%の余白
+  const rawMin = Math.max(0, minV - pad);
+  const rawMax = maxV + pad;
+  // キリのいい数字に丸める（1000万単位）
+  const unit = Math.pow(10, Math.floor(Math.log10(rawMax)) - 1);
+  const min = Math.floor(rawMin / unit) * unit;
+  const max = Math.ceil(rawMax / unit) * unit;
+  return {min, max};
+}
+
 // ========== 保存 ==========
 async function saveData() {
   const rawMonth = document.getElementById('input-month').value;
@@ -615,9 +632,10 @@ function render() {
   const labels = fl.map(r=>r.month.replace('-','/'));
   const totals = fl.map(r=>calcCats(r).total);
 
+  const lineYAxis = calcYAxis(totals);
   renderChart('lineChart','line',
     {labels,datasets:[{data:totals,borderColor:'#185FA5',backgroundColor:'rgba(46,134,171,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:5,fill:true,tension:0.3}]},
-    {y:{ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:11}},grid:{display:false}}},
+    {y:{min:lineYAxis.min,max:lineYAxis.max,ticks:{callback:v=>fmtM(v),font:{size:11},maxTicksLimit:6},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:11}},grid:{display:false}}},
     false,null,
     [{id:'ptLbls',afterDatasetsDraw(chart){
       const{ctx}=chart;
@@ -670,12 +688,13 @@ function renderCatCharts(fl, labels) {
   const catKeys=[{id:'catBank',cat:'bank',color:'#2E86AB'},{id:'catStock',cat:'stock',color:'#BA7517'},{id:'catFund',cat:'fund',color:'#27AE60'},{id:'catZaikei',cat:'zaikei',color:'#534AB7'}];
   catKeys.forEach(({id,cat,color})=>{
     const data=fl.map(r=>calcCats(r)[cat]);
+    const catY=calcYAxis(data);
     const ctx2=document.getElementById(id);if(!ctx2)return;
     if(charts[id])charts[id].destroy();
     charts[id]=new Chart(ctx2,{
       type:'line',
       data:{labels,datasets:[{data,borderColor:color,backgroundColor:hexToRgba(color,0.07),borderWidth:2,pointBackgroundColor:color,pointRadius:5,fill:true,tension:0.3}]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}},scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)}`}}},scales:{y:{min:catY.min,max:catY.max,ticks:{callback:v=>fmtM(v),font:{size:10},maxTicksLimit:5},grid:{color:'rgba(128,128,128,0.1)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}},
       plugins:[{id:'ptL'+cat,afterDatasetsDraw(chart){
         const{ctx}=chart;const tot=chart._allTotals||[];
         chart.getDatasetMeta(0).data.forEach((pt,i)=>{
