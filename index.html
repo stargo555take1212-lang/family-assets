@@ -26,7 +26,7 @@ body{font-family:"Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;background:
 
 /* ===== スプラッシュ / ローディング ===== */
 #splash{position:fixed;inset:0;background:var(--dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
-#splash.hide{opacity:0;pointer-events:none}
+#splash.hide{opacity:0;pointer-events:none;display:none!important}
 #splash .logo{font-size:48px}
 #splash .app-name{color:#fff;font-size:20px;font-weight:700;letter-spacing:.05em}
 #splash .sub{color:rgba(255,255,255,0.5);font-size:13px}
@@ -94,7 +94,7 @@ body{font-family:"Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;background:
 .info-box{font-size:12px;color:var(--text2);background:rgba(46,134,171,0.08);border:1px solid rgba(46,134,171,0.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px}
 
 /* ===== ボタン ===== */
-.btn{border:none;border-radius:var(--radius-sm);padding:14px 24px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn{border:none;border-radius:var(--radius-sm);padding:14px 24px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;-webkit-appearance:none;touch-action:manipulation;}
 .btn-primary{background:var(--dark);color:#fff;width:100%;margin-top:8px}
 .btn-primary:active{opacity:.8;transform:scale(.98)}
 .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);font-size:13px;padding:10px 18px}
@@ -176,13 +176,7 @@ tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- スプラッシュ画面 -->
-<div id="splash">
-  <div class="logo">🏠</div>
-  <div class="app-name">家族の総資産管理</div>
-  <div class="sub">Family Asset Tracker</div>
-  <div class="spinner"></div>
-</div>
+
 
 <div class="app-shell">
   <!-- PCサイドバー -->
@@ -368,32 +362,30 @@ function gasCall(params) {
 
 // ========== 初期ロード ==========
 async function load() {
-  // スプラッシュ表示中はloadingスピナーを出さない
+  showLoading(true);
   try {
-    // 口座設定とデータを並行取得
-    const [settingsRes, dataRes] = await Promise.all([
-      gasCall({action:'getSettings'}),
-      gasCall({action:'getAll'})
-    ]);
+    // 1回のGAS呼び出しで設定とデータを同時取得
+    const res = await gasCall({action:'getAllData'});
 
-    // 口座設定を読み込む
-    if (settingsRes.status === 'ok' && settingsRes.accounts?.length > 0) {
-      FIELDS = settingsRes.accounts;
+    if (res.status === 'ok') {
+      // 口座設定
+      if (res.accounts?.length > 0) {
+        FIELDS = res.accounts;
+      } else {
+        FIELDS = getDefaultFields();
+        await gasCall({action:'saveSettings', data: JSON.stringify(FIELDS)});
+      }
+      // データ
+      records = (res.records || []).map(r => {
+        const month = normalizeMonth(r.month);
+        if (!month) return null;
+        const rec = {month};
+        FIELDS.forEach(f => rec[f.id] = Number(r[f.id]) || 0);
+        return rec;
+      }).filter(Boolean);
     } else {
-      // 初回：デフォルト口座を設定
-      FIELDS = getDefaultFields();
-      await gasCall({action:'saveSettings', data: JSON.stringify(FIELDS)});
+      throw new Error(res.message || 'load error');
     }
-
-    // データを読み込む
-    records = (dataRes.records || []).map(r => {
-      const month = normalizeMonth(r.month);
-      if (!month) return null;
-      const rec = {month};
-      FIELDS.forEach(f => rec[f.id] = Number(r[f.id]) || 0);
-      return rec;
-    }).filter(Boolean);
-
   } catch(e) {
     console.error('load error:', e);
     FIELDS = getDefaultFields();
@@ -764,7 +756,31 @@ function showPage(name){
   if(name==='settings')renderSettings();
 }
 
-function showLoading(show){document.getElementById('loading').style.display=show?'flex':'none';}
+let _firstLoad = true;
+function showLoading(show) {
+  const el = document.getElementById('loading');
+  const msg = document.getElementById('loading-msg');
+  if (show) {
+    el.style.display = 'flex';
+    el.style.pointerEvents = 'all';
+    el.style.opacity = '1';
+    if (!_firstLoad) {
+      // 初回以降は半透明の小さいローディング
+      el.style.background = 'rgba(0,0,0,0.5)';
+      el.querySelector('.app-splash-icon') && (el.querySelector('.app-splash-icon').style.display='none');
+      if(msg) msg.textContent = '処理中...';
+    }
+  } else {
+    el.style.opacity = '0';
+    el.style.pointerEvents = 'none';
+    setTimeout(() => {
+      el.style.display = 'none';
+      el.style.opacity = '1';
+      if (!_firstLoad) el.style.background = 'rgba(0,0,0,0.5)';
+    }, 300);
+    _firstLoad = false;
+  }
+}
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
@@ -797,8 +813,7 @@ window.addEventListener('load', () => {
 });
 
 function hideSplash() {
-  const splash = document.getElementById('splash');
-  if (splash) { splash.classList.add('hide'); setTimeout(() => splash.remove(), 500); }
+  // スプラッシュはloadingに統合済み
 }
 </script>
 </body>
