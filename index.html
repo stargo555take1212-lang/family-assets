@@ -756,29 +756,34 @@ function showPage(name){
   if(name==='settings')renderSettings();
 }
 
-let _firstLoad = true;
+let _isFirstLoad = true;
+let _loadingTimer = null;
+
 function showLoading(show) {
   const el = document.getElementById('loading');
   const msg = document.getElementById('loading-msg');
+  if (!el) return;
+
+  if (_loadingTimer) { clearTimeout(_loadingTimer); _loadingTimer = null; }
+
   if (show) {
     el.style.display = 'flex';
     el.style.pointerEvents = 'all';
     el.style.opacity = '1';
-    if (!_firstLoad) {
-      // 初回以降は半透明の小さいローディング
-      el.style.background = 'rgba(0,0,0,0.5)';
-      el.querySelector('.app-splash-icon') && (el.querySelector('.app-splash-icon').style.display='none');
-      if(msg) msg.textContent = '処理中...';
+    if (!_isFirstLoad) {
+      el.style.background = 'rgba(0,0,0,0.6)';
+      if (msg) msg.textContent = '処理中...';
+    } else {
+      el.style.background = '#1E3A5F';
+      if (msg) msg.textContent = '読み込み中...';
     }
   } else {
-    el.style.opacity = '0';
     el.style.pointerEvents = 'none';
-    setTimeout(() => {
+    el.style.opacity = '0';
+    _loadingTimer = setTimeout(() => {
       el.style.display = 'none';
-      el.style.opacity = '1';
-      if (!_firstLoad) el.style.background = 'rgba(0,0,0,0.5)';
-    }, 300);
-    _firstLoad = false;
+      _isFirstLoad = false;
+    }, 350);
   }
 }
 
@@ -813,7 +818,7 @@ window.addEventListener('load', () => {
 });
 
 function hideSplash() {
-  // スプラッシュはloadingに統合済み
+  showLoading(false);
 }
 </script>
 </body>
